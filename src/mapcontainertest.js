@@ -2,10 +2,12 @@
 to do:
   -learn how to implement that polygon thing https://fullstackreact.github.io/polygons
   -radius?
+  -infowindow - set things there, delete marker, etc
 */
 
 import {Map, InfoWindow, Marker, GoogleApiWrapper} from 'google-maps-react';
 import React, { Component } from 'react'; 
+import MakerWindow from './components/MakerWindow';
 
 export class MapContainer extends Component {
   constructor(props) {
@@ -15,6 +17,7 @@ export class MapContainer extends Component {
       name: this.props.name,
       geoLoc: this.props.geoLoc,
       showingInfoWindow: false,
+      showingMakerWindow: false,
       activeMarker: {},
       selectedPlace: {},
       markers: [],
@@ -56,13 +59,12 @@ export class MapContainer extends Component {
   }
 
   onMarkerClick = (props, marker, e) => {
-    console.log(props)
-    console.log(marker)
-    console.log(e)
+    //debugger 
     this.setState({
       selectedPlace: props,
       activeMarker: marker,
       showingInfoWindow: true
+      //showingMakerWindow: true
     });
   }
  
@@ -97,9 +99,7 @@ export class MapContainer extends Component {
 
   windowHasOpened(){
     // 
-    this.setState({
-      name: "name"
-    })
+    
   }
 
   windowHasClosed() {
@@ -122,14 +122,41 @@ export class MapContainer extends Component {
     return markers 
   }
 
+  deleteMarker = (event) => {
+    console.log("here")
+    //debugger 
+    const markerLatLng = [this.state.selectedPlace.position.lat, this.state.selectedPlace.position.lng]
+
+
+    const newMarkersState = Object.assign([], this.state.markers);
+    let indexOfMarkerToDelete;
+
+    console.log(markerLatLng)
+    this.state.markers.map((marker, i) => {
+      console.log(marker)
+      if (marker[0] === markerLatLng[0] && marker[1] === markerLatLng[1]) {
+        return indexOfMarkerToDelete = i //debugger 
+      }
+    })
+    
+    
+    if (indexOfMarkerToDelete > -1) {
+      newMarkersState.splice(indexOfMarkerToDelete, 1)
+    }
+
+    this.setState({
+      markers: newMarkersState,
+      showingInfoWindow: false,
+      activeMarker: null
+    })
+  }
+
   render() {
     //debugger 
     const style = {
       width: '100vw',
       height: '100vh'
     }
-
-    
 
     let markersList 
     if (this.state.markers.length > 0) {
@@ -138,9 +165,22 @@ export class MapContainer extends Component {
 
     return (
       <div style={style}>
+        <div className="menu">
+          {this.state.showingInfoWindow &&
+            <div>
+              <h3>menu</h3>
+              <button
+                onClick={this.deleteMarker.bind(this)}
+              >
+                      <div>
+                        remove marker
+                      </div>
+            </button>
+            </div>
+          }
+        </div>
         {this.state.geoLoc !== undefined && this.state.geoLoc.length > 1 &&
           <div>
-
             {this.state.markers.length > 0 && 
               <Map
                 google={this.props.google} 
@@ -161,12 +201,13 @@ export class MapContainer extends Component {
                   marker={this.state.activeMarker}
                   onOpen={this.windowHasOpened.bind(this)}
                   onClose={this.windowHasClosed.bind(this)}
-                  visible={this.state.showingInfoWindow}>
+                  visible={this.state.showingInfoWindow}
+                >
                     <div>
                       <h1>{this.state.selectedPlace.name}</h1>
+                      <MakerWindow />
                     </div>
                 </InfoWindow>
-
               </Map>
             }
           </div>
