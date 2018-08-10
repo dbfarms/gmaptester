@@ -31,3 +31,18 @@
   border: 1px;
   z-index: 1000;
 }
+
+.menu {
+  border: 1px solid rgba(117,117,117,0.2);
+  margin: 5px;
+}
+
+.pcoords {
+  display: grid;
+  float: center;
+  grid-template-columns: auto auto auto;
+  width: 100%;
+  grid-row-gap: 10px ;
+  border: 1px solid rgba(117,117,117,0.2);
+  
+}

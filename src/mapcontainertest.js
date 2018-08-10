@@ -5,9 +5,10 @@ to do:
   -infowindow - set things there, delete marker, etc
 */
 
-import {Map, InfoWindow, Marker, GoogleApiWrapper} from 'google-maps-react';
+import {Map, InfoWindow, Marker, GoogleApiWrapper, Polygon} from 'google-maps-react';
 import React, { Component } from 'react'; 
 import MakerWindow from './components/MakerWindow';
+import MakerMarkerMenu from './components/MakerMarkerMenu';
 
 export class MapContainer extends Component {
   constructor(props) {
@@ -21,6 +22,7 @@ export class MapContainer extends Component {
       activeMarker: {},
       selectedPlace: {},
       markers: [],
+      selectedMarker: {},      
     }
 
   }
@@ -39,31 +41,51 @@ export class MapContainer extends Component {
 
     //eventually this will load from the server from saved maps, or will not exist for new maps **********************888
     //right now it just sets to state predetermined positions based on location
+    //also it creates the polygon here though it'll have to be done elsewhere soon
     if (nextProps.geoLoc) {
       //debugger 
       let markerListHere = []
       for (let i = 1; i<5; i++) {
+        let markerObject = {position: [], polygonCoords: []};
         let newMarker = []
         let newPosition = i * .001
         newMarker[0] = nextProps.geoLoc[0] + newPosition;
         newMarker[1] = nextProps.geoLoc[1] + newPosition;
-        markerListHere.push(newMarker)
+        markerObject.position = newMarker 
+        let polygonCoordsSketch = [
+          {lat: newMarker[0] + .0003, lng: newMarker[1] + .0003},
+          {lat: newMarker[0] - .0003, lng: newMarker[1] - .0003},
+          {lat: newMarker[0] - .0002, lng: newMarker[1] + .0002},
+        ];
+        markerObject.polygonCoords = polygonCoordsSketch
+        markerListHere.push(markerObject)
       }
 
-    this.setState ({
-      markers: markerListHere
-    })
-
+      this.setState ({
+        markers: markerListHere
+      })
     }
-  
   }
 
   onMarkerClick = (props, marker, e) => {
-    //debugger 
+
+    const selectedMarkerLatLng = [props.position.lat, props.position.lng]
+
+    const selectedMarkerProps = this.state.markers.filter(marker => {
+      if (marker.position[0] === selectedMarkerLatLng[0] && marker.position[1] === selectedMarkerLatLng[1]) {
+        return marker //debugger
+      }
+    })
+
+    console.log(selectedMarkerProps)
+
+    const selectedMP = selectedMarkerProps[0]
+
     this.setState({
       selectedPlace: props,
       activeMarker: marker,
-      showingInfoWindow: true
+      showingInfoWindow: true,
+      selectedMarker: selectedMP,
       //showingMakerWindow: true
     });
   }
@@ -79,8 +101,9 @@ export class MapContainer extends Component {
       })
     }
 
-    const newMarker = [map.latLng.lat(), map.latLng.lng()]
+    const newMarker = {position: [map.latLng.lat(), map.latLng.lng()], polygonCoords: []}
     const newMarkersList = this.state.markers 
+    
     newMarkersList.push(newMarker)
 
     this.setState({
@@ -113,9 +136,9 @@ export class MapContainer extends Component {
     const markers = this.state.markers.map((marker, key)=> {
       return (
         <Marker 
-          onClick={this.onMarkerClick}
+          onClick={this.onMarkerClick.bind(this)}
           key={key}
-          position={{lat: marker[0], lng: marker[1]}}
+          position={{lat: marker.position[0], lng: marker.position[1]}}
         />
       )
     })
@@ -134,11 +157,10 @@ export class MapContainer extends Component {
     console.log(markerLatLng)
     this.state.markers.map((marker, i) => {
       console.log(marker)
-      if (marker[0] === markerLatLng[0] && marker[1] === markerLatLng[1]) {
+      if (marker.position[0] === markerLatLng[0] && marker.position[1] === markerLatLng[1]) {
         return indexOfMarkerToDelete = i //debugger 
       }
     })
-    
     
     if (indexOfMarkerToDelete > -1) {
       newMarkersState.splice(indexOfMarkerToDelete, 1)
@@ -151,6 +173,24 @@ export class MapContainer extends Component {
     })
   }
 
+  setPolygonsNow = () => {
+    const polygonsDrawn = this.state.markers.map((marker, key) => {
+      return (
+        <Polygon
+          key={key}
+          paths={marker.polygonCoords}
+          strokeColor="#0000FF"
+          strokeOpacity={0.8}
+          strokeWeight={2}
+          fillColor="#0000FF"
+          fillOpacity={0.35} 
+        />
+      )
+    })
+
+    return polygonsDrawn
+  }
+
   render() {
     //debugger 
     const style = {
@@ -159,32 +199,32 @@ export class MapContainer extends Component {
     }
 
     let markersList 
+    let polygonList
     if (this.state.markers.length > 0) {
-      markersList = this.setMarkersNow()
+      markersList = this.setMarkersNow();
+      polygonList = this.setPolygonsNow();
     }
+
+    const triangleCoords = [
+      {lat: 41.3690575, lng: -74.2698225},
+      {lat: 41.4, lng: -74.3798225},
+      {lat: 41.5, lng: -74.4898225}
+    ];
 
     return (
       <div style={style}>
-        <div className="menu">
-          {this.state.showingInfoWindow &&
-            <div>
-              <h3>menu</h3>
-              <button
-                onClick={this.deleteMarker.bind(this)}
-              >
-                      <div>
-                        remove marker
-                      </div>
-            </button>
-            </div>
-          }
-        </div>
+        <MakerMarkerMenu 
+          marker={this.state.selectedPlace}
+          showMenu={this.state.showingInfoWindow}
+          deleteMarker={this.deleteMarker.bind(this)}
+          selectedMarkerProps={this.state.selectedMarker}
+        />
         {this.state.geoLoc !== undefined && this.state.geoLoc.length > 1 &&
           <div>
             {this.state.markers.length > 0 && 
               <Map
                 google={this.props.google} 
-                zoom={14}
+                zoom={16}
                 initialCenter={{
                   lat: this.state.geoLoc[0],
                   lng: this.state.geoLoc[1]
@@ -192,6 +232,8 @@ export class MapContainer extends Component {
                 onReady={this.fetchPlaces}
                 onClick={this.onMapClicked.bind(this)}
               >
+
+                {polygonList}
               
                 {markersList.map((marker, key) => {
                   return marker

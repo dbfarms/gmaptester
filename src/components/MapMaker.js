@@ -23,20 +23,20 @@ export default class MapMaker extends Component {
         const {name, value } = event.target
         debugger 
     
-      }
+    }
 
     render() {
         let name;
         return (
             <form onSubmit={this.handleSubmit.bind(this)}> 
-            <div>
-                <input 
-                type="text"
-                onChange={this.handleChange.bind(this)}
-                name="name"
-                value={name}
-                />
-            </div>
+                <div>
+                    <input 
+                    type="text"
+                    onChange={this.handleChange.bind(this)}
+                    name="name"
+                    value={name}
+                    />
+                </div>
 
             </form>
         )
