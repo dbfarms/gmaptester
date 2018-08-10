@@ -1,3 +1,10 @@
+/*
+notes: need to pass the new state as it's being changed to the parent compoent mapcontainertest
+-it shouldn't actually set state there though... so maybe there's a temp thing?
+
+
+*/
+
 import React, { Component } from 'react';
 
 export default class MakerMarkerMenu extends Component {
@@ -9,6 +16,7 @@ export default class MakerMarkerMenu extends Component {
             deleteMarker: props.deleteMarker,
             marker: props.marker,
             markerProps: props.selectedMarkerProps,
+            tempProps: props.tempProps,
         }
     }
 
@@ -32,21 +40,20 @@ export default class MakerMarkerMenu extends Component {
     handleInputChange =  event => {
         
         const {name, value } = event.target
-        //debugger
 
         const nameBreakdown = name.split("-")
         const posOrKey = nameBreakdown[1].split(" ")
         const latOrLng = posOrKey[0]
         const key = Number(posOrKey[1])
 
-        const newMarkerProps = Object.assign({}, this.state.markerProps)
+        const newMarkerSketch = Object.assign({}, this.state.markerProps)
 
-        newMarkerProps.polygonCoords[key][latOrLng] = Number(value)
-        console.log(this.state.markerProps)
-        //debugger 
+        newMarkerSketch.polygonCoords[key][latOrLng] = Number(value)
+
+        this.state.tempProps(newMarkerSketch, key)
 
         this.setState({
-            markerProps: newMarkerProps
+            markerProps: newMarkerSketch
         })
     }
 

@@ -174,6 +174,11 @@ export class MapContainer extends Component {
   }
 
   setPolygonsNow = () => {
+    /*
+      notes: isn't reflecting updated state! *************************************************88888888
+    */
+    console.log("setting polygons now")
+    console.log(this.state.markers)
     const polygonsDrawn = this.state.markers.map((marker, key) => {
       return (
         <Polygon
@@ -191,6 +196,30 @@ export class MapContainer extends Component {
     return polygonsDrawn
   }
 
+  polygonSketcher = (newMarkerPolygonSketch, key) => {
+
+    const editingMarker = newMarkerPolygonSketch.position
+
+    const thisMarker = this.state.markers.filter(marker => {
+      return (marker.position[0] === editingMarker[0] && marker.position[1] === editingMarker[1])
+    })
+
+    const editedMarkerList = Object.assign([], this.state.markers)
+
+    editedMarkerList.map(marker => {
+      if (marker.position[0] === editingMarker[0] && marker.position[1] === editingMarker[1]) {
+        marker = thisMarker
+      }
+    })
+
+    //debugger 
+
+    this.setState({
+      markers: editedMarkerList
+    })
+
+  }
+
   render() {
     //debugger 
     const style = {
@@ -205,12 +234,6 @@ export class MapContainer extends Component {
       polygonList = this.setPolygonsNow();
     }
 
-    const triangleCoords = [
-      {lat: 41.3690575, lng: -74.2698225},
-      {lat: 41.4, lng: -74.3798225},
-      {lat: 41.5, lng: -74.4898225}
-    ];
-
     return (
       <div style={style}>
         <MakerMarkerMenu 
@@ -218,6 +241,7 @@ export class MapContainer extends Component {
           showMenu={this.state.showingInfoWindow}
           deleteMarker={this.deleteMarker.bind(this)}
           selectedMarkerProps={this.state.selectedMarker}
+          tempProps={this.polygonSketcher.bind(this)}
         />
         {this.state.geoLoc !== undefined && this.state.geoLoc.length > 1 &&
           <div>
