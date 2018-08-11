@@ -50,7 +50,7 @@ export default class MakerMarkerMenu extends Component {
 
         newMarkerSketch.polygonCoords[key][latOrLng] = Number(value)
 
-        this.state.tempProps(newMarkerSketch, key)
+        this.state.tempProps(newMarkerSketch, key, latOrLng)
 
         this.setState({
             markerProps: newMarkerSketch

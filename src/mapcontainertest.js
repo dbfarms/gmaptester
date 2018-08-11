@@ -173,22 +173,36 @@ export class MapContainer extends Component {
     })
   }
 
+  onPolygonClick = () => {
+    debugger 
+  }
+
+  bindRef = ref => this.ref = ref;
+
   setPolygonsNow = () => {
     /*
-      notes: isn't reflecting updated state! *************************************************88888888
-    */
+      notes: works but is sorta useless compared to editable polygon*********************************************88888888
+      -need to have state reflect edited polygon
+      */
     console.log("setting polygons now")
     console.log(this.state.markers)
     const polygonsDrawn = this.state.markers.map((marker, key) => {
+      console.log(this.ref)
       return (
         <Polygon
           key={key}
+          ref={this.bindRef}
           paths={marker.polygonCoords}
           strokeColor="#0000FF"
           strokeOpacity={0.8}
           strokeWeight={2}
           fillColor="#0000FF"
           fillOpacity={0.35} 
+          onClick={this.onPolygonClick}
+          options={{
+            editable: true,
+            draggable: true 
+          }}
         />
       )
     })
@@ -196,7 +210,7 @@ export class MapContainer extends Component {
     return polygonsDrawn
   }
 
-  polygonSketcher = (newMarkerPolygonSketch, key) => {
+  polygonSketcher = (newMarkerPolygonSketch, key, latOrLng) => {
 
     const editingMarker = newMarkerPolygonSketch.position
 
@@ -212,6 +226,10 @@ export class MapContainer extends Component {
       }
     })
 
+    //LEFT OFF HERE, REF.PROPS.PATHS IS NOT UPDATING BUT THIS SEEMS TO BE THE RIGHT TRACK
+    //--ALSO! THERE'S A BUILTIN DRAGGABLE OPTION FOR POLYGONS SO LOOK INTO THAT TOO
+    //this.ref.props.paths[key] = newMarkerPolygonSketch.position 
+    this.ref.polygon.setPaths(newMarkerPolygonSketch.polygonCoords)
     //debugger 
 
     this.setState({

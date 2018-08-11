@@ -1,3 +1,11 @@
+notes: 
+-proximity to: when within certain distance trigger event
+  the nearer, the louder...? etc
+  -beat? pace?
+
+extras: -local temp
+
+
 This project was bootstrapped with [Create React App](https://github.com/facebookincubator/create-react-app).
 
 Below you will find some information on how to perform common tasks.<br>
