@@ -23,6 +23,7 @@ export class MapContainer extends Component {
       selectedPlace: {},
       markers: [],
       selectedMarker: {},      
+      editPolygon: false,
     }
 
   }
@@ -46,7 +47,7 @@ export class MapContainer extends Component {
       //debugger 
       let markerListHere = []
       for (let i = 1; i<5; i++) {
-        let markerObject = {position: [], polygonCoords: []};
+        let markerObject = {position: [], polygonCoords: [], polygonObject: []}; 
         let newMarker = []
         let newPosition = i * .001
         newMarker[0] = nextProps.geoLoc[0] + newPosition;
@@ -174,38 +175,84 @@ export class MapContainer extends Component {
   }
 
   onPolygonClick = () => {
+
+    this.ref.polygon.getPath()["b"].forEach(latLng => {
+      debugger 
+    })
+
+    debugger
+    //console.log(this.ref.props.paths)
+    //console.log(this.state.markers[0].polygonCoords)
+    //debugger 
+
+    this.setState({
+      editPolygon: !this.state.editPolygon
+    })
+    console.log(this.state.editPolygon)
+  }
+
+  onDragEnd = () => {
     debugger 
   }
 
-  bindRef = ref => this.ref = ref;
+  //bindRef = ref => this.ref = ref; 
+  
+  bindRef = (ref) => {
+    this.ref = ref
+    const addedPolygonMarkers = Object.assign([], this.state.markers)
+
+    console.log(ref)
+    if (ref != null) {
+      for (let i =0; i < addedPolygonMarkers.length; i++) {
+        if (i === ref.props.id) {
+          addedPolygonMarkers[i].polygonObject = ref 
+
+          if (this.state.markers[i] !== addedPolygonMarkers[i]) {
+            this.setState({
+              markers: addedPolygonMarkers
+            })
+          }
+        }
+      }
+    }
+
+    //debugger 
+    
+    
+  }
 
   setPolygonsNow = () => {
     /*
       notes: works but is sorta useless compared to editable polygon*********************************************88888888
       -need to have state reflect edited polygon
       */
-    console.log("setting polygons now")
-    console.log(this.state.markers)
     const polygonsDrawn = this.state.markers.map((marker, key) => {
-      console.log(this.ref)
+      //debugger 
+      //console.log(this.ref)
       return (
         <Polygon
           key={key}
-          ref={this.bindRef}
+          id={key}
+          //ref={this.bindRef}
+          ref={this.bindRef.bind(this)}
           paths={marker.polygonCoords}
           strokeColor="#0000FF"
           strokeOpacity={0.8}
           strokeWeight={2}
           fillColor="#0000FF"
           fillOpacity={0.35} 
-          onClick={this.onPolygonClick}
+          onClick={this.onPolygonClick.bind(this)}
+          onDrag={this.onDragEnd.bind(this)} //not working
           options={{
-            editable: true,
+            editable: true, // this.state.editPolygon ? true : false, //this doesn't work and i don't know why 
             draggable: true 
           }}
         />
       )
     })
+
+    console.log("this")
+    console.log(this.ref)
 
     return polygonsDrawn
   }
@@ -228,7 +275,7 @@ export class MapContainer extends Component {
 
     //LEFT OFF HERE, REF.PROPS.PATHS IS NOT UPDATING BUT THIS SEEMS TO BE THE RIGHT TRACK
     //--ALSO! THERE'S A BUILTIN DRAGGABLE OPTION FOR POLYGONS SO LOOK INTO THAT TOO
-    //this.ref.props.paths[key] = newMarkerPolygonSketch.position 
+    
     this.ref.polygon.setPaths(newMarkerPolygonSketch.polygonCoords)
     //debugger 
 
@@ -237,6 +284,7 @@ export class MapContainer extends Component {
     })
 
   }
+
 
   render() {
     //debugger 
