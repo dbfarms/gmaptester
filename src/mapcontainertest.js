@@ -5,10 +5,11 @@ to do:
   -infowindow - set things there, delete marker, etc
 */
 
-import {Map, InfoWindow, Marker, GoogleApiWrapper, Polygon} from 'google-maps-react';
+import {Map, InfoWindow, Marker, GoogleApiWrapper, Polygon, Polyline} from 'google-maps-react';
 import React, { Component } from 'react'; 
 import MakerWindow from './components/MakerWindow';
 import MakerMarkerMenu from './components/MakerMarkerMenu';
+//import { Polyline } from "react-google-maps";
 
 export class MapContainer extends Component {
   constructor(props) {
@@ -24,6 +25,7 @@ export class MapContainer extends Component {
       markers: [],
       selectedMarker: {},      
       editPolygon: false,
+      testPolyLine: []
     }
 
   }
@@ -33,6 +35,7 @@ export class MapContainer extends Component {
     console.log(this.state)
   }
 
+  
   componentWillReceiveProps(nextProps){
     console.log(this.props)
     console.log(nextProps)
@@ -58,12 +61,23 @@ export class MapContainer extends Component {
           {lat: newMarker[0] - .0003, lng: newMarker[1] - .0003},
           {lat: newMarker[0] - .0002, lng: newMarker[1] + .0002},
         ];
+
         markerObject.polygonCoords = polygonCoordsSketch
         markerListHere.push(markerObject)
       }
 
+      const geoLoc = nextProps.geoLoc
+      //debugger 
+      const testPolyLine = [
+        {lat: geoLoc[0], lng: geoLoc[1] },
+        {lat: geoLoc[0] + .001, lng: geoLoc[1] + .002},
+        {lat: geoLoc[0] + .001, lng: geoLoc[1] + .002},
+      ]
+      console.log(testPolyLine)
+
       this.setState ({
-        markers: markerListHere
+        markers: markerListHere,
+        testPolyLine: testPolyLine
       })
     }
   }
@@ -174,19 +188,84 @@ export class MapContainer extends Component {
     })
   }
 
-  onPolygonClick = () => {
+  onPolygonClick = (props, polygon, e) => {
+    //i think e is where i clicked, so probably can get rid of it
+    
+    const editingId = props.id; 
+    const editedPolygon = this.state.markers[editingId]
+    console.log(editingId)
+    console.log(props)
+    console.log(polygon)
+    console.log(e)
 
-    this.ref.polygon.getPath()["b"].forEach(latLng => {
+    function getPaths(polygon){
+      var coordinates = (polygon.getPath().getArray());
+      console.log(coordinates);
+    }
+
+    getPaths(polygon)
+
+    const newCoords = []
+    const polygonDetails = [this, editingId, newCoords]
+
+    //this seems to work but i don't know why
+    // - this.state.markers[at the position selected].polygonObject at whatever position is reflecting the correct
+    //value for some reason 
+    //eventually i'll need to do more than set state and post info to server... at which point i'll revisit this
+    console.log(editedPolygon)
+    for (let i=0; i<editedPolygon.polygonCoords.length; i++) {
+      //debugger 
+      console.log(editedPolygon.polygonObject.polygon.getPath()["b"][i].lat())
+      console.log(editedPolygon.polygonObject.polygon.getPath()["b"][i].lng())
+      editedPolygon.polygonObject.props.paths[i].lat = editedPolygon.polygonObject.polygon.getPath()["b"][i].lat()
+      editedPolygon.polygonObject.props.paths[i].lng = editedPolygon.polygonObject.polygon.getPath()["b"][i].lng()
+    }
+
+    debugger 
+
+    const updatedPolygon = editedPolygon.polygonObject.polygon.getPath()["b"].forEach(latLng => {
+      
       debugger 
-    })
+      
+      return latLng 
+      /*
+      console.log(latLng.lat())
+      console.log(latLng.lng())
+      console.log(this.state.markers[0].polygonCoords)
+      console.log(this)
 
-    debugger
+      const polygonHere = this[0]
+      const idOfPolygon = this[1] 
+
+      ///how to get latLng.lat() and latLng.lng() to the right places in the state.markers... 
+
+      const newLat = latLng.lat()
+      const newLng = latLng.lng()
+      const newLatLng = [newLat, newLng]
+      debugger 
+      this[2].push(newLatLng)
+
+
+      //debugger 
+
+      return this 
+      */
+
+    }, polygonDetails)
+
     //console.log(this.ref.props.paths)
     //console.log(this.state.markers[0].polygonCoords)
     //debugger 
 
+    const markersWithNewPolygonCoords = Object.assign([], this.state.markers)
+    //markersWithNewPolygonCoords[editingId].polygonObject = updatedPolygon 
+
+    //debugger 
+
+
     this.setState({
       editPolygon: !this.state.editPolygon
+      
     })
     console.log(this.state.editPolygon)
   }
@@ -198,12 +277,17 @@ export class MapContainer extends Component {
   //bindRef = ref => this.ref = ref; 
   
   bindRef = (ref) => {
+
+    //debugger 
+
     this.ref = ref
     const addedPolygonMarkers = Object.assign([], this.state.markers)
 
+    
     console.log(ref)
     if (ref != null) {
-      for (let i =0; i < addedPolygonMarkers.length; i++) {
+      //debugger 
+      for (let i=0; i < addedPolygonMarkers.length; i++) {
         if (i === ref.props.id) {
           addedPolygonMarkers[i].polygonObject = ref 
 
@@ -217,42 +301,43 @@ export class MapContainer extends Component {
     }
 
     //debugger 
-    
-    
   }
 
   setPolygonsNow = () => {
-    /*
-      notes: works but is sorta useless compared to editable polygon*********************************************88888888
-      -need to have state reflect edited polygon
-      */
-    const polygonsDrawn = this.state.markers.map((marker, key) => {
-      //debugger 
-      //console.log(this.ref)
+    const polygonsDrawn = this.state.markers.map((polygon, key) => {
+
+      const newRef = this.bindRef.bind(this) 
+
+      const newPolygon = <Polygon
+        key={key}
+        id={key}
+        ref={this.bindRef.bind(this)}
+        //ref={key}
+        paths={polygon.polygonCoords}
+        strokeColor="#0000FF"
+        strokeOpacity={0.8}
+        strokeWeight={2}
+        fillColor="#0000FF"
+        fillOpacity={0.35} 
+        onClick={this.onPolygonClick.bind(this)}
+        onMouseDown={event => console.log(event)}
+        options={{
+          editable: true, // this.state.editPolygon ? true : false, //this doesn't work and i don't know why 
+          draggable: true 
+        }}
+      />
+
       return (
-        <Polygon
-          key={key}
-          id={key}
-          //ref={this.bindRef}
-          ref={this.bindRef.bind(this)}
-          paths={marker.polygonCoords}
-          strokeColor="#0000FF"
-          strokeOpacity={0.8}
-          strokeWeight={2}
-          fillColor="#0000FF"
-          fillOpacity={0.35} 
-          onClick={this.onPolygonClick.bind(this)}
-          onDrag={this.onDragEnd.bind(this)} //not working
-          options={{
-            editable: true, // this.state.editPolygon ? true : false, //this doesn't work and i don't know why 
-            draggable: true 
-          }}
-        />
+        newPolygon
       )
     })
 
     console.log("this")
     console.log(this.ref)
+
+    //debugger 
+
+    //this.refs = polygonsDrawn
 
     return polygonsDrawn
   }
@@ -273,8 +358,6 @@ export class MapContainer extends Component {
       }
     })
 
-    //LEFT OFF HERE, REF.PROPS.PATHS IS NOT UPDATING BUT THIS SEEMS TO BE THE RIGHT TRACK
-    //--ALSO! THERE'S A BUILTIN DRAGGABLE OPTION FOR POLYGONS SO LOOK INTO THAT TOO
     
     this.ref.polygon.setPaths(newMarkerPolygonSketch.polygonCoords)
     //debugger 
@@ -292,6 +375,8 @@ export class MapContainer extends Component {
       width: '100vw',
       height: '100vh'
     }
+
+    //debugger 
 
     let markersList 
     let polygonList
@@ -322,6 +407,14 @@ export class MapContainer extends Component {
                 onReady={this.fetchPlaces}
                 onClick={this.onMapClicked.bind(this)}
               >
+
+                <Polyline
+                  path={this.state.testPolyLine}
+                  strokeColor="#0000FF"
+                  strokeOpacity={0.8}
+                  strokeWeight={2} 
+                />
+              
 
                 {polygonList}
               
