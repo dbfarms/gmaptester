@@ -1,0 +1,115 @@
+/*
+// Styling Cross-Browser Compatible Range Inputs with Sass
+// Github: https://github.com/darlanrod/input-range-sass
+// Author: Darlan Rod https://github.com/darlanrod
+// Version 1.4.1
+// MIT License
+*/
+
+/*
+@mixin shadow(shadow-size, shadow-blur, shadow-color) {
+  box-shadow: shadow-size shadow-size shadow-blur shadow-color, 0 0 shadow-size lighten(shadow-color, 5%);
+}
+
+@mixin track {
+  cursor: pointer;
+  height: 10px;
+  transition: all .2s ease;
+  width: 100%;
+}
+
+@mixin thumb {
+  @include shadow(0, 0, #111);
+  background: #666;
+  border: 0 solid #fff;
+  border-radius: 12px;
+  cursor: pointer;
+  height: 10px;
+  width: 12px;
+}
+
+[type='range'] {
+  -webkit-appearance: none;
+  margin: 10px / 2 0;
+  width: 100%;
+
+  &:focus {
+    outline: 0;
+
+    &::-ms-fill-lower {
+      background: #eee;
+    }
+
+    &::-ms-fill-upper {
+      background: lighten(#eee, contrast);
+    }
+  }
+
+  [type='range']:focus {
+    outline: 0;
+  }
+
+  [type='range']:focus::-webkit-slider-runnable-track {
+    background: lighten(#eee, contrast); 
+  }
+
+  [type='range']:focus::-ms-fill-lower {
+    background: #eee;
+  }
+  /*
+  &::-webkit-slider-runnable-track {
+    @include track;
+    @include shadow(0, 0, #222);
+    background: #eee;
+    border: 0 solid #000;
+    border-radius: 5px;
+  }
+
+  &::-webkit-slider-thumb {
+    @include thumb;
+    -webkit-appearance: none;
+    margin-top: ((-0 * 2 + 10px) / 2) - (10px / 2);
+  }
+
+  &::-moz-range-track {
+    @include track;
+    @include shadow(0, 0, #222);
+    background: #eee;
+    border: 0 solid #000;
+    border-radius: 5px;
+  }
+
+  &::-moz-range-thumb {
+    @include thumb;
+  }
+
+  &::-ms-track {
+    @include track;
+    background: transparent;
+    border-color: transparent;
+    border-width: (10px / 2) 0;
+    color: transparent;
+  }
+
+  &::-ms-fill-lower {
+    @include shadow(0, 0, #222);
+    background: darken(#eee, contrast);
+    border: 0 solid #000;
+    border-radius: 5px * 2;
+  }
+
+
+  &::-ms-fill-upper {
+    @include shadow(0, 0, #222);
+    background: #eee;
+    border: 0 solid #000;
+    border-radius: 5px * 2;
+  }
+
+  &::-ms-thumb {
+    @include thumb;
+    margin-top: 0;
+  }
+}
+
+*/

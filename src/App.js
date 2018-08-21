@@ -2,9 +2,10 @@ import React, { Component } from 'react';
 import MapContainer from './mapcontainertest';
 import MapMaker from './components/MapMaker';
 import MapUser from './components/MapUser';
+import Player from './components/Player';
+import ReactPlayer from 'react-player' //'react-player/lib/players/FilePlayer'; //'react-player' NOT SURE IF THIS WORKS FOR MOBILE YET
 import './App.css';
 
-//require('dotenv').config()
 require('dotenv').config({path: __dirname + '/.env'})
 
 class App extends Component {
@@ -40,6 +41,7 @@ class App extends Component {
     //debugger 
     console.log(this.state)
 
+    //<ReactPlayer file="../../getLostJams/06-chilax.mp3" attributes="controls" playing controls/> 
     return (
       <div className="App">
         <p>map maker / map user</p>
@@ -62,6 +64,10 @@ class App extends Component {
               />
               Use a Map
             </label>
+            <div className='player-wrapper'>
+              <Player />
+            </div>
+            
           </div>
           {this.state.userOrMaker === 'maker' &&
             <MapMaker />
